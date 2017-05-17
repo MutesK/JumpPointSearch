@@ -30,6 +30,14 @@ struct st_Tile
 	BYTE BColor;
 };
 
+struct st_Jump
+{
+	int iX;
+	int iY;
+	int iDir;
+	int JumpX;
+	int JumpY;
+};
 
 struct st_Node
 {

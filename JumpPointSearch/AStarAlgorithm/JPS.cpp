@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "JPS.h"
 #include <time.h> 
+#include <stack>
 extern HDC g_hDC;
 extern RECT rect;
 extern st_Tile BlockMap[][MAP_HEIGHT];
@@ -15,6 +16,8 @@ BYTE lR_byCheckColor = 0;
 BYTE lG_byCheckColor = 0;
 BYTE lB_byCheckColor = 0;
 
+
+stack<st_Jump> JumpStack;
 //------------------------------------------------------
 // 길찾기 메인 함수.
 //
@@ -246,6 +249,10 @@ BOOL CheckWalkable(int iX, int iY)
 	if (BlockMap[iY][iX].Type == dfOBSTACLE)
 		return false;
 
+	BlockMap[iY][iX].RColor = lR_byCheckColor;
+	BlockMap[iY][iX].BColor = lB_byCheckColor;
+	BlockMap[iY][iX].GColor = lG_byCheckColor;
+
 	return true;
 
 }
@@ -337,8 +344,8 @@ bool CheckAxis(int iX, int iY, float NextG, st_Node *pParent)
 				pNode->m_F = pNode->m_G + pNode->m_H;
 			}
 			// 클로즈리스트에서 제거한다.
-			CloseList.erase(iter);
-			OpenList.push_back(pNode);
+			//CloseList.erase(iter);
+			//OpenList.push_back(pNode);
 			return true;
 		} 
 	}
@@ -349,176 +356,286 @@ bool CheckAxis(int iX, int iY, float NextG, st_Node *pParent)
 
 BOOL Jump(int iX, int iY, int iDir, int *pJumpX, int *pJumpY)
 {
-
-	if (!CheckWalkable(iX, iY))
-		return false; // 못걷는 상태인데 모르겟다
-
-  // 목적지 확인 후 좌표 아웃
-	if (iX == endPoint->m_iXpos && iY == endPoint->m_iYpos)
+	JumpStack.empty();
+	st_Jump JumpNode = { iX, iY, iDir, iX, iY };
+	int X, Y, Dir, JumpX, JumpY;
+	int Xpos;
+	int Ypos;
+	JumpStack.push(JumpNode);
+	do
 	{
-		*pJumpX = iX;
-		*pJumpY = iY;
-		return true;
-	}
+		JumpNode = JumpStack.top();
+		JumpStack.pop();
 
-	BlockMap[iY][iX].RColor = lR_byCheckColor;
-	BlockMap[iY][iX].BColor = lB_byCheckColor;
-	BlockMap[iY][iX].GColor = lG_byCheckColor;
+		X = JumpNode.iX;
+		Y = JumpNode.iY;
+		Dir = JumpNode.iDir;
+		JumpX = JumpNode.JumpX;
+		JumpY = JumpNode.JumpY;
 
-	switch (iDir)
-	{
-	case dfDIR_DD:
-		if (!CheckWalkable(iX - 1, iY) && CheckWalkable(iX - 1, iY + 1) ||
-			!CheckWalkable(iX + 1, iY) && CheckWalkable(iX + 1, iY + 1))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
+		if (!CheckWalkable(X, Y))
+			return false; // 못걷는 상태인데 모르겟다
 
-		return Jump(iX, iY + 1, iDir, pJumpX, pJumpY);
-	case dfDIR_RR:
-		if (!CheckWalkable(iX, iY - 1) && CheckWalkable(iX + 1, iY - 1) ||
-			!CheckWalkable(iX, iY + 1) && CheckWalkable(iX + 1, iY + 1))
+	  // 목적지 확인 후 좌표 아웃
+		if (X == endPoint->m_iXpos && Y == endPoint->m_iYpos)
 		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-		return Jump(iX + 1, iY, iDir, pJumpX, pJumpY);
-	case dfDIR_UU:
-		if (!CheckWalkable(iX - 1, iY) && CheckWalkable(iX - 1, iY - 1) ||
-			!CheckWalkable(iX + 1, iY) && CheckWalkable(iX + 1, iY - 1))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-		return Jump(iX, iY - 1, iDir, pJumpX, pJumpY);
-	case dfDIR_LL:
-		if (!CheckWalkable(iX, iY - 1) && CheckWalkable(iX - 1, iY - 1) ||
-			!CheckWalkable(iX, iY + 1) && CheckWalkable(iX - 1, iY + 1))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-		return Jump(iX - 1, iY, iDir, pJumpX, pJumpY);
-	case dfDIR_LU:
-		if (!CheckWalkable(iX, iY + 1) && CheckWalkable(iX - 1, iY + 1) ||
-			!CheckWalkable(iX + 1, iY) && CheckWalkable(iX + 1, iY - 1))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-
-		/*
-		- 수직/수평 Jump 재귀 호출
-		Jump 후 코너 발견시 현좌표 아웃 return;
-		*/
-		if (Jump(iX - 1, iY, dfDIR_LL, pJumpX, pJumpY))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-
-		if (Jump(iX, iY - 1, dfDIR_UU, pJumpX, pJumpY))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-
-		// - 방향으로 재귀 Jump
-		return Jump(iX - 1, iY - 1, iDir, pJumpX, pJumpY);
-	case dfDIR_RU:
-		if (!CheckWalkable(iX, iY + 1) && CheckWalkable(iX + 1, iY + 1) ||
-			!CheckWalkable(iX - 1, iY) && CheckWalkable(iX - 1, iY - 1))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-
-		/*
-		- 수직/수평 Jump 재귀 호출
-		Jump 후 코너 발견시 현좌표 아웃 return;
-		*/
-		if (Jump(iX + 1, iY, dfDIR_RR, pJumpX, pJumpY))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-		if (Jump(iX, iY - 1, dfDIR_UU, pJumpX, pJumpY))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
+			*pJumpX = JumpX;
+			*pJumpY = JumpY;
 			return true;
 		}
 
 
-		// - 방향으로 재귀 Jump
-		return Jump(iX + 1, iY - 1, iDir, pJumpX, pJumpY);
-	case dfDIR_RD:
-		if (!CheckWalkable(iX, iY - 1) && CheckWalkable(iX + 1, iY - 1) ||
-			!CheckWalkable(iX - 1, iY) && CheckWalkable(iX - 1, iY + 1))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
+		printf("JumpStack Size : %d \n", JumpStack.size());
 
-		/*
-		- 수직/수평 Jump 재귀 호출
-		Jump 후 코너 발견시 현좌표 아웃 return;
-		*/
-		if (Jump(iX + 1, iY, dfDIR_RR, pJumpX, pJumpY))
+		switch (iDir)
 		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-		if (Jump(iX, iY + 1, dfDIR_DD, pJumpX, pJumpY))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-		// - 방향으로 재귀 Jump
-		return Jump(iX + 1, iY + 1, iDir, pJumpX, pJumpY);
+		case dfDIR_DD:
+			if (!CheckWalkable(X - 1, Y) && CheckWalkable(X - 1, Y + 1) ||
+				!CheckWalkable(X + 1, Y) && CheckWalkable(X + 1, Y + 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
 
-	case dfDIR_LD:
-		if (!CheckWalkable(iX, iY - 1) && CheckWalkable(iX - 1, iY - 1) ||
-			!CheckWalkable(iX + 1, iY) && CheckWalkable(iX + 1, iY + 1))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
+			//return Jump(X, Y + 1, iDir, pJumpX, pJumpY);
+			JumpNode = { X, Y + 1, iDir, X, Y + 1 };
+			JumpStack.push(JumpNode);
+			break;
+		case dfDIR_RR:
+			if (!CheckWalkable(X, Y - 1) && CheckWalkable(X + 1, Y - 1) ||
+				!CheckWalkable(X, Y + 1) && CheckWalkable(X + 1, Y + 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
 
-		/*
-		- 수직/수평 Jump 재귀 호출
-		Jump 후 코너 발견시 현좌표 아웃 return;
-		*/
-		if (Jump(iX - 1, iY, dfDIR_LL, pJumpX, pJumpY))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
-		if (Jump(iX, iY + 1, dfDIR_DD, pJumpX, pJumpY))
-		{
-			*pJumpX = iX;
-			*pJumpY = iY;
-			return true;
-		}
+			//return Jump(X + 1, Y, iDir, pJumpX, pJumpY);
+			JumpNode = { X + 1, Y, iDir, X + 1, Y };
+			JumpStack.push(JumpNode);
+			break;
+		case dfDIR_UU:
+			if (!CheckWalkable(X - 1, Y) && CheckWalkable(X - 1, Y - 1) ||
+				!CheckWalkable(X + 1, Y) && CheckWalkable(X + 1, Y - 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
+			//return Jump(X, Y - 1, iDir, pJumpX, pJumpY);
+			JumpNode = { X, Y - 1, iDir, X, Y - 1 };
+			JumpStack.push(JumpNode);
+			break;
+		case dfDIR_LL:
+			if (!CheckWalkable(X, Y - 1) && CheckWalkable(X - 1, Y - 1) ||
+				!CheckWalkable(X, Y + 1) && CheckWalkable(X - 1, Y + 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
+			//return Jump(X - 1, Y, iDir, pJumpX, pJumpY);
+			JumpNode = { X - 1, Y, iDir, X - 1, Y };
+			JumpStack.push(JumpNode);
+			break;
+			
+		case dfDIR_LU:
+			if (!CheckWalkable(X, Y + 1) && CheckWalkable(X - 1, Y + 1) ||
+				!CheckWalkable(X + 1, Y) && CheckWalkable(X + 1, Y - 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
 
-		// - 방향으로 재귀 Jump
-		return Jump(iX - 1, iY + 1, iDir, pJumpX, pJumpY);
-	}
+			//- 수직/수평 Jump 재귀 호출
+			//Jump 후 코너 발견시 현좌표 아웃 return;
+			// dfDIR_LL 방향 탐색
+			 Xpos = X - 1;
+			 Ypos = Y;
+
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if (!CheckWalkable(Xpos, Ypos - 1) && CheckWalkable(Xpos - 1, Ypos - 1) ||
+					!CheckWalkable(Xpos, Ypos + 1) && CheckWalkable(Xpos - 1, Ypos + 1) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Xpos--;
+			}
+
+			// dfDIR_UU 방향 탐색
+			Xpos = X;
+			Ypos = Y - 1;
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if ((!CheckWalkable(Xpos - 1, Ypos) && CheckWalkable(Xpos - 1, Ypos - 1) ||
+					!CheckWalkable(Xpos + 1, Ypos) && CheckWalkable(Xpos + 1, Ypos - 1)) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Ypos--;
+			}
+
+			// - 방향으로 재귀 Jump
+			//return Jump(X - 1, Y - 1, iDir, pJumpX, pJumpY);
+			JumpNode = { X - 1, Y - 1, iDir, X - 1, Y - 1 };
+			JumpStack.push(JumpNode);
+			break;
+		case dfDIR_RU:
+			if (!CheckWalkable(X, Y + 1) && CheckWalkable(X + 1, Y + 1) ||
+				!CheckWalkable(X - 1, Y) && CheckWalkable(X - 1, Y - 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
+
+		
+
+			// dfDIR_RR 방향
+			Xpos = X + 1;
+			Ypos = Y;
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if ((!CheckWalkable(Xpos, Ypos - 1) && CheckWalkable(Xpos + 1, Ypos - 1) ||
+					!CheckWalkable(Xpos, Ypos + 1) && CheckWalkable(Xpos + 1, Ypos + 1)) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Xpos++;
+			}
+
+			// dfDIR_UU 방향
+			Xpos = X;
+			Ypos = Y - 1;
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if ((!CheckWalkable(Xpos - 1, Ypos) && CheckWalkable(Xpos - 1, Ypos - 1) ||
+					!CheckWalkable(Xpos + 1, Ypos) && CheckWalkable(Xpos + 1, Ypos - 1)) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Ypos--;
+			}
+
+			// - 방향으로 재귀 Jump
+			JumpNode = { X + 1, Y - 1, iDir, X + 1, Y - 1 };
+			JumpStack.push(JumpNode);
+			break;
+		case dfDIR_RD:
+			if (!CheckWalkable(X, Y - 1) && CheckWalkable(X + 1, Y - 1) ||
+				!CheckWalkable(X - 1, Y) && CheckWalkable(X - 1, Y + 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
+
+			
+			//- 수직/수평 Jump 재귀 호출
+			//Jump 후 코너 발견시 현좌표 아웃 return;
+			// RR
+			Xpos = X + 1;
+			Ypos = Y;
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if ((!CheckWalkable(Xpos, Ypos - 1) && CheckWalkable(Xpos + 1, Ypos - 1) ||
+					!CheckWalkable(Xpos, Ypos + 1) && CheckWalkable(Xpos + 1, Ypos + 1)) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Xpos++;
+			}
+
+			// DD
+			Xpos = X ;
+			Ypos = Y + 1;
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if ((!CheckWalkable(Xpos - 1, Ypos) && CheckWalkable(Xpos - 1, Ypos + 1) ||
+					!CheckWalkable(Xpos + 1, Ypos) && CheckWalkable(Xpos + 1, Ypos + 1)) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Ypos++;
+			}
+			// - 방향으로 재귀 Jump
+			//return Jump(X + 1, Y + 1, iDir, pJumpX, pJumpY);
+			JumpNode = { X + 1, Y + 1, iDir, X + 1, Y + 1 };
+			JumpStack.push(JumpNode);
+			break;
+		case dfDIR_LD:
+			if (!CheckWalkable(X, Y - 1) && CheckWalkable(X - 1, Y - 1) ||
+				!CheckWalkable(X + 1, Y) && CheckWalkable(X + 1, Y + 1))
+			{
+				*pJumpX = JumpX;
+				*pJumpY = JumpY;
+				return true;
+			}
+
+			
+			//- 수직/수평 Jump 재귀 호출
+			//Jump 후 코너 발견시 현좌표 아웃 return;
+			// LL
+			Xpos = X - 1;
+			Ypos = Y;
+
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if ((!CheckWalkable(Xpos, Ypos - 1) && CheckWalkable(Xpos - 1, Ypos - 1) ||
+					!CheckWalkable(Xpos, Ypos + 1) && CheckWalkable(Xpos - 1, Ypos + 1)) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Xpos--;
+			}
+
+			// DD
+			Xpos = X;
+			Ypos = Y + 1;
+			while (CheckWalkable(Xpos, Ypos))
+			{
+				if ((!CheckWalkable(Xpos - 1, Ypos) && CheckWalkable(Xpos - 1, Ypos + 1) ||
+					!CheckWalkable(Xpos + 1, Ypos) && CheckWalkable(Xpos + 1, Ypos + 1)) ||
+					Xpos == endPoint->m_iXpos && Ypos == endPoint->m_iYpos)
+				{
+					*pJumpX = JumpX;
+					*pJumpY = JumpY;
+					return true;
+				}
+				Ypos++;
+			}
+
+			// - 방향으로 재귀 Jump
+			//return Jump(X - 1, Y + 1, iDir, pJumpX, pJumpY);
+			JumpNode = { X - 1, Y + 1, iDir, X - 1, Y + 1 };
+			JumpStack.push(JumpNode);
+			break;
+		}
+	}while (JumpStack.size() > 0);
 	return true;
 }
 
