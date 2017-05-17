@@ -337,8 +337,8 @@ bool CheckAxis(int iX, int iY, float NextG, st_Node *pParent)
 				pNode->m_F = pNode->m_G + pNode->m_H;
 			}
 			// 클로즈리스트에서 제거한다.
-			//CloseList.erase(iter);
-			//OpenList.push_back(pNode);
+			CloseList.erase(iter);
+			OpenList.push_back(pNode);
 			return true;
 		} 
 	}
@@ -349,15 +349,11 @@ bool CheckAxis(int iX, int iY, float NextG, st_Node *pParent)
 
 BOOL Jump(int iX, int iY, int iDir, int *pJumpX, int *pJumpY)
 {
-	BlockMap[iY][iX].RColor = lR_byCheckColor;
-	BlockMap[iY][iX].BColor = lB_byCheckColor;
-	BlockMap[iY][iX].GColor = lG_byCheckColor;
 
 	if (!CheckWalkable(iX, iY))
 		return false; // 못걷는 상태인데 모르겟다
 
-
-					  // 목적지 확인 후 좌표 아웃
+  // 목적지 확인 후 좌표 아웃
 	if (iX == endPoint->m_iXpos && iY == endPoint->m_iYpos)
 	{
 		*pJumpX = iX;
@@ -365,6 +361,9 @@ BOOL Jump(int iX, int iY, int iDir, int *pJumpX, int *pJumpY)
 		return true;
 	}
 
+	BlockMap[iY][iX].RColor = lR_byCheckColor;
+	BlockMap[iY][iX].BColor = lB_byCheckColor;
+	BlockMap[iY][iX].GColor = lG_byCheckColor;
 
 	switch (iDir)
 	{
