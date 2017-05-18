@@ -62,6 +62,9 @@ bool JumpPointSearch(int iStartX, int iStartY, int iDestX, int iDestY, BOOL bNew
 	}
 	else
 	{
+		if (OpenList.size() == 0)
+			return true;
+
 		OpenList.sort(compNode);
 		st_Node *pNode = (*OpenList.begin());
 		if (OpenList.size() == 0)
@@ -342,10 +345,10 @@ bool CheckAxis(int iX, int iY, float NextG, st_Node *pParent)
 				pNode->pParentNode = pParent;
 				pNode->m_G = NextG;
 				pNode->m_F = pNode->m_G + pNode->m_H;
+
+				CloseList.erase(iter);
+				OpenList.push_back(pNode);
 			}
-			// 클로즈리스트에서 제거한다.
-			//CloseList.erase(iter);
-			//OpenList.push_back(pNode);
 			return true;
 		} 
 	}
@@ -384,8 +387,6 @@ BOOL Jump(int iX, int iY, int iDir, int *pJumpX, int *pJumpY)
 			return true;
 		}
 
-
-		printf("JumpStack Size : %d \n", JumpStack.size());
 
 		switch (iDir)
 		{

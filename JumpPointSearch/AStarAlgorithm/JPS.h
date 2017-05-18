@@ -22,6 +22,7 @@ using namespace std;
 #define dfDIR_DD 16
 #define dfDIR_LD 17
 
+
 struct st_Tile
 {
 	int Type;
@@ -50,6 +51,8 @@ struct st_Node
 	float m_F;
 	float m_G;
 	float m_H;
+
+	// 카운터 추가해서 최대 탐색점을 구해야된다.
 };
 
 bool JumpPointSearch(int iStartX, int iStartY, int iDestX, int iDestY, BOOL bNewSearch);

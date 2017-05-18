@@ -1,7 +1,12 @@
-﻿  JPS.cpp
-c:\users\mute\desktop\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(54): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\mute\desktop\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(78): warning C4244: '인수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\mute\desktop\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(275): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\mute\desktop\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(290): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  AStarAlgorithm.vcxproj -> C:\Users\Mute\Desktop\JumpPointSearch\JumpPointSearch\x64\Debug\JumpPointSearch.exe
-  AStarAlgorithm.vcxproj -> C:\Users\Mute\Desktop\JumpPointSearch\JumpPointSearch\x64\Debug\JumpPointSearch.pdb (Full PDB)
+﻿  stdafx.cpp
+  JPS.cpp
+d:\workspace\github\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(54): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+d:\workspace\github\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(81): warning C4244: '인수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+d:\workspace\github\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(282): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+d:\workspace\github\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(297): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+d:\workspace\github\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(391): warning C4477: 'printf' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'unsigned __int64'입니다.
+  d:\workspace\github\jumppointsearch\jumppointsearch\astaralgorithm\jps.cpp(391): note: 서식 문자열에서 '%zd'을(를) 사용하는 것이 좋습니다.
+  AStarAlgorithm.cpp
+  코드를 생성하고 있습니다...
+  AStarAlgorithm.vcxproj -> D:\Workspace\Github\JumpPointSearch\JumpPointSearch\x64\Debug\JumpPointSearch.exe
+  AStarAlgorithm.vcxproj -> D:\Workspace\Github\JumpPointSearch\JumpPointSearch\x64\Debug\JumpPointSearch.pdb (Full PDB)
