@@ -36,6 +36,9 @@
     <ClInclude Include="JPS.h">
       <Filter>JumpPointSearch</Filter>
     </ClInclude>
+    <ClInclude Include="JumpPointSearch.h">
+      <Filter>JumpPointSearch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -45,6 +48,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="JPS.cpp">
+      <Filter>JumpPointSearch</Filter>
+    </ClCompile>
+    <ClCompile Include="JumpPointSearch.cpp">
       <Filter>JumpPointSearch</Filter>
     </ClCompile>
   </ItemGroup>

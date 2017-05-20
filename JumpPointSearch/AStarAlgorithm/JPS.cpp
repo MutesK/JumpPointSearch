@@ -8,10 +8,11 @@ extern st_Tile BlockMap[][MAP_HEIGHT];
 extern st_Node* startPoint;
 extern st_Node* endPoint;
 
-bool isFirst = true;
-bool isSuccess = false;
-list<st_Node *> OpenList;
-list<st_Node *> CloseList;
+
+extern bool isFirst;
+extern bool isSuccess;
+extern list<st_Node *> OpenList;
+extern list<st_Node *> CloseList;
 BYTE lR_byCheckColor = 0;
 BYTE lG_byCheckColor = 0;
 BYTE lB_byCheckColor = 0;
@@ -46,6 +47,7 @@ bool JumpPointSearch(int iStartX, int iStartY, int iDestX, int iDestY, BOOL bNew
 
 	if (isFirst)
 	{
+		printf("==================================== JPS No Class ==================================== \n");
 		startPoint->m_iXpos = iStartX;
 		startPoint->m_iYpos = iStartY;
 
@@ -69,6 +71,8 @@ bool JumpPointSearch(int iStartX, int iStartY, int iDestX, int iDestY, BOOL bNew
 		st_Node *pNode = (*OpenList.begin());
 		if (OpenList.size() == 0)
 			return true;
+
+		printf("### OpenList Pop : Xpos : %d, Ypos : %d F : %f \n", pNode->m_iXpos, pNode->m_iYpos, pNode->m_F);
 
 		OpenList.erase(OpenList.begin());
 		CloseList.push_back(pNode);
@@ -202,7 +206,7 @@ void NeighborsNode(st_Node *pNode)
 			CheckDirection(pNode, Xpos, Ypos - 1, dfDIR_UU);
 
 			// 옵션체크 LD, RU
-			if (!CheckWalkable(Xpos, Ypos - 1))
+			if (!CheckWalkable(Xpos, Ypos + 1))
 				CheckDirection(pNode, Xpos - 1, Ypos + 1, dfDIR_LD);
 			if (!CheckWalkable(Xpos + 1, Ypos))
 				CheckDirection(pNode, Xpos + 1, Ypos - 1, dfDIR_RU);
@@ -270,7 +274,6 @@ BOOL CheckDirection(st_Node *pParent, int iX, int iY, int iDir)
 	if (Jump(iX, iY, iDir, &JumpX, &JumpY))
 	{
 		srand((unsigned)time(NULL));
-
 		float NextG;
 		// 대각선인 경우
 		switch (iDir)
@@ -665,143 +668,4 @@ void Clear()
 	
 }
 
-void DrawMap()
-{
-	PatBlt(g_hDC, 0, 0, rect.right, rect.bottom, WHITENESS);
-	int Xpos = 0;
-	int Ypos = 0;
 
-	HPEN hPen, oldPen;
-	hPen = CreatePen(PS_SOLID, 1, RGB(192, 192, 192));
-	oldPen = (HPEN)SelectObject(g_hDC, hPen);
-
-	// 세로 선을 그린다.
-	for (int y = 0; y <= MAP_HEIGHT; y++)
-	{
-		MoveToEx(g_hDC, Xpos, Ypos, NULL);
-		LineTo(g_hDC, Xpos, TILE_HEIGHT * MAP_WIDTH);
-		Xpos += TILE_WIDTH;
-	}
-
-	// 가로 선을 그린다.
-	Xpos = 0;
-	for (int x = 0; x <= MAP_WIDTH; x++)
-	{
-		MoveToEx(g_hDC, Xpos, Ypos, NULL);
-		LineTo(g_hDC, TILE_WIDTH * MAP_HEIGHT, Ypos);
-		Ypos += TILE_HEIGHT;
-	}
-
-
-	///////////////////////////////////////////////////////////////////////////
-	HBRUSH hRedBrush;
-	HBRUSH hGreenBrush;
-	HBRUSH hGrayBrush;
-	HBRUSH hYelloBrush; // CloseList
-	HBRUSH hBlueBrush; // OpenList
-	HBRUSH hOldBrush;
-	HBRUSH hRandomBrush;  
-	hGreenBrush = CreateSolidBrush(RGB(0, 255, 0));
-	hRedBrush = CreateSolidBrush(RGB(255, 0, 0));
-	hGrayBrush = CreateSolidBrush(RGB(105, 105, 105));
-	hYelloBrush = CreateSolidBrush(RGB(255, 255, 0));
-	hBlueBrush = CreateSolidBrush(RGB(0, 191, 255));
-
-	std::list<st_Node *>::iterator iter;
-
-	// 방해물 & 타일 색칠
-	int X = 0, Y = 0;
-	for (Y = 0; Y < MAP_WIDTH; Y++)
-	{
-		for (X = 0; X < MAP_HEIGHT; X++)
-		{
-			if (BlockMap[Y][X].Type == dfOBSTACLE)
-			{
-				hOldBrush = (HBRUSH)SelectObject(g_hDC, hGrayBrush);
-				Xpos = X * TILE_WIDTH;
-				Ypos = Y * TILE_HEIGHT;
-				Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
-			}
-			else
-			{
-				// 타일색칠
-				hRandomBrush = CreateSolidBrush(RGB(255 - BlockMap[Y][X].RColor, 255 - BlockMap[Y][X].GColor, 255 - BlockMap[Y][X].BColor));
-				hOldBrush = (HBRUSH)SelectObject(g_hDC, hRandomBrush);
-				Xpos = X * TILE_WIDTH;
-				Ypos = Y * TILE_HEIGHT;
-				Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
-				DeleteObject(hRandomBrush);
-			}
-		}
-	}
-
-	DeleteObject(hGrayBrush);
-	// OpenList 출력
-	hOldBrush = (HBRUSH)SelectObject(g_hDC, hBlueBrush);
-	for (iter = OpenList.begin(); iter != OpenList.end(); iter++)
-	{
-		Xpos = (*iter)->m_iXpos * TILE_WIDTH;
-		Ypos = (*iter)->m_iYpos * TILE_HEIGHT;
-		Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
-	}
-	DeleteObject(hBlueBrush);
-
-	// CloseList 출력
-	hOldBrush = (HBRUSH)SelectObject(g_hDC, hYelloBrush);
-	for (iter = CloseList.begin(); iter != CloseList.end(); iter++)
-	{
-		Xpos = (*iter)->m_iXpos * TILE_WIDTH;
-		Ypos = (*iter)->m_iYpos * TILE_HEIGHT;
-		Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
-	}
-	DeleteObject(hYelloBrush);
-
-	// 출발
-	hOldBrush = (HBRUSH)SelectObject(g_hDC, hGreenBrush);
-	Xpos = startPoint->m_iXpos * TILE_WIDTH;
-	Ypos = startPoint->m_iYpos * TILE_HEIGHT;
-	Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
-	DeleteObject(hGreenBrush);
-
-	// 목적지
-	hOldBrush = (HBRUSH)SelectObject(g_hDC, hRedBrush);
-	Xpos = endPoint->m_iXpos * TILE_WIDTH;
-	Ypos = endPoint->m_iYpos * TILE_HEIGHT;
-	Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
-	DeleteObject(hRedBrush);
-
-
-	DeleteObject(hPen);
-	SelectObject(g_hDC, hOldBrush);
-	SelectObject(g_hDC, oldPen);
-
-	PrintPath();
-}
-
-void PrintPath()
-{
-	if (isSuccess)
-	{
-		st_Node *pNode = endPoint;
-		HPEN hPen, oldPen;
-		hPen = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
-		oldPen = (HPEN)SelectObject(g_hDC, hPen);
-
-		while (pNode != startPoint)
-		{
-			// 사각형 가운데에서 다음 사각형 가운데로 선을 긋는다.
-			int StartXpos = pNode->m_iXpos * TILE_WIDTH + TILE_WIDTH / 2;
-			int StartYpos = pNode->m_iYpos * TILE_HEIGHT + TILE_HEIGHT / 2;
-			int EndXpos = pNode->pParentNode->m_iXpos * TILE_WIDTH + TILE_WIDTH / 2;
-			int EndYpos = pNode->pParentNode->m_iYpos * TILE_HEIGHT + TILE_HEIGHT / 2;
-
-			MoveToEx(g_hDC, StartXpos, StartYpos, NULL);
-			LineTo(g_hDC, EndXpos, EndYpos);
-
-			pNode = pNode->pParentNode;
-		}
-
-		DeleteObject(hPen);
-		SelectObject(g_hDC, oldPen);
-	}
-}

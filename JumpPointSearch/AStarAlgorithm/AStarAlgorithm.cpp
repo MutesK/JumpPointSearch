@@ -6,6 +6,7 @@
 #include <list>
 #include "JPS.h"
 #include "resource.h"
+#include "JumpPointSearch.h"
 using namespace std;
 
 #define MAX_LOADSTRING 100
@@ -16,6 +17,8 @@ WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
 bool isLDown = false;
+bool isFirst = true;
+bool isSuccess = false;
 HBITMAP g_hMemDC_Bitmap;
 HDC g_hDC;
 HBITMAP g_hMemDC_OldBitmap;
@@ -25,6 +28,10 @@ HWND g_hWnd; HANDLE hTimer;
 st_Node* startPoint;
 st_Node* endPoint;
 st_Tile BlockMap[MAP_WIDTH][MAP_HEIGHT];
+CJumpPointSearch::st_Point Point[100];
+
+list<st_Node *> OpenList;
+list<st_Node *> CloseList;
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -34,6 +41,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 void DrawMap();
 void Render();
 
+CJumpPointSearch Search(MAP_WIDTH, MAP_HEIGHT);
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPWSTR    lpCmdLine,
@@ -42,6 +50,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	// TODO: 여기에 코드를 입력합니다.
+	if (AllocConsole()) {
+		freopen("CONIN$", "rb", stdin);
+		freopen("CONOUT$", "wb", stdout);
+		freopen("CONOUT$", "wb", stderr);
+	}
+
 
 
 	// 전역 문자열을 초기화합니다.
@@ -250,6 +264,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// 길찾기 시작
 		// 타이머 동작시작
 		Clear();
+		
 		hTimer = (HANDLE)SetTimer(hWnd, 1, 100, NULL);
 		SendMessage(hWnd, WM_TIMER, 1, 0);
 		timer = true;
@@ -264,6 +279,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				KillTimer(hWnd, 1);
 				timer = false;
 				// PathFind 완료거나 못찾음.
+
+				Search.MapOpen(BlockMap[0]);
+				memset(Point, 0, sizeof(CJumpPointSearch::st_Point) * 100);
+				Search.PathFind(startPoint->m_iXpos, startPoint->m_iYpos, endPoint->m_iXpos,
+					endPoint->m_iYpos, Point, 100);
 			}
 		}
 		break;
@@ -324,7 +344,171 @@ void Render()
 {
 	// 기초 타일 그리기
 	DrawMap();
+
 	InvalidateRect(g_hWnd, NULL, FALSE);
-	Sleep(10);
+	Sleep(0);
 }
 
+
+
+void DrawMap()
+{
+	PatBlt(g_hDC, 0, 0, rect.right, rect.bottom, WHITENESS);
+	int Xpos = 0;
+	int Ypos = 0;
+
+	HPEN hPen, oldPen;
+	hPen = CreatePen(PS_SOLID, 1, RGB(192, 192, 192));
+	oldPen = (HPEN)SelectObject(g_hDC, hPen);
+
+	// 세로 선을 그린다.
+	for (int y = 0; y <= MAP_HEIGHT; y++)
+	{
+		MoveToEx(g_hDC, Xpos, Ypos, NULL);
+		LineTo(g_hDC, Xpos, TILE_HEIGHT * MAP_WIDTH);
+		Xpos += TILE_WIDTH;
+	}
+
+	// 가로 선을 그린다.
+	Xpos = 0;
+	for (int x = 0; x <= MAP_WIDTH; x++)
+	{
+		MoveToEx(g_hDC, Xpos, Ypos, NULL);
+		LineTo(g_hDC, TILE_WIDTH * MAP_HEIGHT, Ypos);
+		Ypos += TILE_HEIGHT;
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////
+	HBRUSH hRedBrush;
+	HBRUSH hGreenBrush;
+	HBRUSH hGrayBrush;
+	HBRUSH hYelloBrush; // CloseList
+	HBRUSH hBlueBrush; // OpenList
+	HBRUSH hOldBrush;
+	HBRUSH hRandomBrush;
+	hGreenBrush = CreateSolidBrush(RGB(0, 255, 0));
+	hRedBrush = CreateSolidBrush(RGB(255, 0, 0));
+	hGrayBrush = CreateSolidBrush(RGB(105, 105, 105));
+	hYelloBrush = CreateSolidBrush(RGB(255, 255, 0));
+	hBlueBrush = CreateSolidBrush(RGB(0, 191, 255));
+
+	std::list<st_Node *>::iterator iter;
+
+	// 방해물 & 타일 색칠
+	int X = 0, Y = 0;
+	for (Y = 0; Y < MAP_WIDTH; Y++)
+	{
+		for (X = 0; X < MAP_HEIGHT; X++)
+		{
+			if (BlockMap[Y][X].Type == dfOBSTACLE)
+			{
+				hOldBrush = (HBRUSH)SelectObject(g_hDC, hGrayBrush);
+				Xpos = X * TILE_WIDTH;
+				Ypos = Y * TILE_HEIGHT;
+				Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
+			}
+			else
+			{
+				// 타일색칠
+				hRandomBrush = CreateSolidBrush(RGB(255 - BlockMap[Y][X].RColor, 255 - BlockMap[Y][X].GColor, 255 - BlockMap[Y][X].BColor));
+				hOldBrush = (HBRUSH)SelectObject(g_hDC, hRandomBrush);
+				Xpos = X * TILE_WIDTH;
+				Ypos = Y * TILE_HEIGHT;
+				Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
+				DeleteObject(hRandomBrush);
+			}
+		}
+	}
+
+	DeleteObject(hGrayBrush);
+	// OpenList 출력
+	hOldBrush = (HBRUSH)SelectObject(g_hDC, hBlueBrush);
+	for (iter = OpenList.begin(); iter != OpenList.end(); iter++)
+	{
+		Xpos = (*iter)->m_iXpos * TILE_WIDTH;
+		Ypos = (*iter)->m_iYpos * TILE_HEIGHT;
+		Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
+	}
+	DeleteObject(hBlueBrush);
+
+	// CloseList 출력
+	hOldBrush = (HBRUSH)SelectObject(g_hDC, hYelloBrush);
+	for (iter = CloseList.begin(); iter != CloseList.end(); iter++)
+	{
+		Xpos = (*iter)->m_iXpos * TILE_WIDTH;
+		Ypos = (*iter)->m_iYpos * TILE_HEIGHT;
+		Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
+	}
+	DeleteObject(hYelloBrush);
+
+	// 출발
+	hOldBrush = (HBRUSH)SelectObject(g_hDC, hGreenBrush);
+	Xpos = startPoint->m_iXpos * TILE_WIDTH;
+	Ypos = startPoint->m_iYpos * TILE_HEIGHT;
+	Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
+	DeleteObject(hGreenBrush);
+
+	// 목적지
+	hOldBrush = (HBRUSH)SelectObject(g_hDC, hRedBrush);
+	Xpos = endPoint->m_iXpos * TILE_WIDTH;
+	Ypos = endPoint->m_iYpos * TILE_HEIGHT;
+	Rectangle(g_hDC, Xpos, Ypos, Xpos + TILE_WIDTH, Ypos + TILE_HEIGHT);
+	DeleteObject(hRedBrush);
+
+
+	DeleteObject(hPen);
+	SelectObject(g_hDC, hOldBrush);
+	SelectObject(g_hDC, oldPen);
+
+	PrintPath();
+}
+
+void PrintPath()
+{
+	if (isSuccess)
+	{
+		st_Node *pNode = endPoint;
+		HPEN hPen, oldPen;
+		hPen = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
+		oldPen = (HPEN)SelectObject(g_hDC, hPen);
+
+		while (pNode != startPoint)
+		{
+			// 사각형 가운데에서 다음 사각형 가운데로 선을 긋는다.
+			int StartXpos = pNode->m_iXpos * TILE_WIDTH + TILE_WIDTH / 2;
+			int StartYpos = pNode->m_iYpos * TILE_HEIGHT + TILE_HEIGHT / 2;
+			int EndXpos = pNode->pParentNode->m_iXpos * TILE_WIDTH + TILE_WIDTH / 2;
+			int EndYpos = pNode->pParentNode->m_iYpos * TILE_HEIGHT + TILE_HEIGHT / 2;
+
+			MoveToEx(g_hDC, StartXpos, StartYpos, NULL);
+			LineTo(g_hDC, EndXpos, EndYpos);
+
+			pNode = pNode->pParentNode;
+		}
+
+		DeleteObject(hPen);
+
+		hPen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+		oldPen = (HPEN)SelectObject(g_hDC, hPen);
+
+
+		for (int i = 1; i < 100; i++)
+		{
+			if (Point[i].X == 0 && Point[i].Y == 0)
+				return;
+
+			int StartXpos = Point[i - 1].X * TILE_WIDTH + TILE_WIDTH / 2;
+			int StartYpos = Point[i - 1].Y * TILE_HEIGHT + TILE_HEIGHT / 2;
+			int EndXpos = Point[i].X * TILE_WIDTH + TILE_WIDTH / 2;
+			int EndYpos = Point[i].Y * TILE_HEIGHT + TILE_HEIGHT / 2;
+
+			MoveToEx(g_hDC, StartXpos, StartYpos, NULL);
+			LineTo(g_hDC, EndXpos, EndYpos);
+		}
+
+		DeleteObject(hPen);
+		SelectObject(g_hDC, oldPen);
+	}
+
+}

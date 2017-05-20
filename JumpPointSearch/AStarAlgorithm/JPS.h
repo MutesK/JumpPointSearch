@@ -6,11 +6,7 @@ using namespace std;
 #define TILE_WIDTH 15 // Xรเ
 #define TILE_HEIGHT 15 // Yรเ
 
-#define MAP_WIDTH 45
-#define MAP_HEIGHT 80
 
-#define dfEMPTY 0
-#define dfOBSTACLE 1
 
 
 #define dfDIR_RU 10
@@ -23,13 +19,6 @@ using namespace std;
 #define dfDIR_LD 17
 
 
-struct st_Tile
-{
-	int Type;
-	BYTE RColor;
-	BYTE GColor;
-	BYTE BColor;
-};
 
 struct st_Jump
 {
@@ -73,3 +62,5 @@ bool compNode(const st_Node* a, const st_Node *b);
 void Clear();
 void DrawMap();
 void PrintPath();
+
+
