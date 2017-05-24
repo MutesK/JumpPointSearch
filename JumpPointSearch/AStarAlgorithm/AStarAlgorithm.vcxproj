@@ -147,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AStarAlgorithm.h" />
+    <ClInclude Include="BresenhamLine.h" />
     <ClInclude Include="JPS.h" />
     <ClInclude Include="JumpPointSearch.h" />
     <ClInclude Include="Resource.h" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AStarAlgorithm.cpp" />
+    <ClCompile Include="BresenhamLine.cpp" />
     <ClCompile Include="JPS.cpp" />
     <ClCompile Include="JumpPointSearch.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -37,12 +37,40 @@ bool CJumpPointSearch::PathFind(int startX, int startY, int DestX, int DestY, st
 	// 맵을 로드하지 않음.
 	if (p_BlockMap == nullptr)
 		return false;
+
+
+	// 만약 바로 찾을수 있다면?
+
+
+
+
+
 	printf("==================================== JPS In Class ==================================== \n");
 	memset(pArray, 0, sizeof(st_Point) * ArraySize);
 	Clear();
 
 	// 시작과 끝의 노드를 초기화한다.
 	InitNode(startX, startY, DestX, DestY);
+
+	pBresham = new CBresenhamLine(startX, startY, DestX, DestY);
+	int Xpos = 0;
+	int Ypos = 0;
+	while (!pBresham->PeekNext(&Xpos, &Ypos))
+	{
+		if (!CheckWalkable(Xpos, Ypos))
+			break;
+
+		pBresham->GetNext(&Xpos, &Ypos);
+	}
+
+	if (Xpos == DestX && Ypos == DestY)
+	{
+		m_pEndPoint->pParentNode = m_pStartPoint;
+		m_pStartPoint->pNext = m_pEndPoint;
+		InputArray(pArray, ArraySize);
+		return true;
+	}
+
 
 	// OpenList에 추가한다.
 	OpenList.insert(m_pStartPoint);
@@ -565,23 +593,57 @@ void CJumpPointSearch::InputArray(st_Point *pArray, int ArraySize)
 		pNode = pNode->pParentNode;
 	}
 
+	int Xpos, Ypos;
 	int i = 0;
+	int iCount = 0;
 	pNode = m_pStartPoint;
-		for (; i < ArraySize; i++)
+	for (; i < ArraySize; i++)
+	{
+		if (pNode == nullptr)
+			break;
+
+		if (pNode->pNext != nullptr)
 		{
 
-			if (pNode == nullptr)
-				break;
-			
-			pArray[i].X = pNode->m_iXpos;
-			pArray[i].Y = pNode->m_iYpos;
+			st_Node *pNodeNext = pNode->pNext->pNext;
 
-			pNode = pNode->pNext;
+			while (1)
+			{
+
+				if (pNodeNext == nullptr)
+					break;
+
+				pBresham->SetPosition(pNode->m_iXpos, pNode->m_iYpos, pNodeNext->m_iXpos, pNodeNext->m_iYpos);
+				while (!pBresham->PeekNext(&Xpos, &Ypos))
+				{
+					if (!CheckWalkable(Xpos, Ypos))
+						break;
+
+					pBresham->GetNext(&Xpos, &Ypos);
+				}
+
+				if (Xpos == pNodeNext->m_iXpos && Ypos == pNodeNext->m_iYpos)
+				{
+					pNode->pNext = pNodeNext;
+					pNodeNext->pParentNode = pNode;
+
+					pNodeNext = pNodeNext->pNext;
+				}
+				else
+					break;
+
+			}
 		}
 
+		pArray[i].X = pNode->m_iXpos;
+		pArray[i].Y = pNode->m_iYpos;
+		iCount++;
 
-		printf("### Operation Result ### \n");
-		printf("### OpenCount = %d, JumpCount = %d \n", m_iOpenCount, m_iJumpCount);
+		pNode = pNode->pNext;
+	}
+
+	printf("### Operation Result ### \n");
+	printf("### OpenCount = %d, JumpCount = %d RealCount = %d\n", m_iOpenCount, m_iJumpCount, iCount);
 }
 
 

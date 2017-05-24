@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "BresenhamLine.h"
 #include <algorithm>
 #include <set>
 
@@ -124,6 +125,7 @@ private:
 	multiset<st_Node *, NODE_COMPARE<st_Node *>> CloseList;
 	
 	st_Tile *p_BlockMap;
+	CBresenhamLine* pBresham;
 
 #define CheckWalkable(X, Y)  !(((X) < 0) || ((Y) < 0) || ((X) >= m_iHeight) || ((Y) >= m_iWidth) || ((p_BlockMap + (Y) * m_iHeight + (X))->Type == dfOBSTACLE))
 };

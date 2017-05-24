@@ -1,8 +1,63 @@
-﻿  AStarAlgorithm.cpp
+﻿  stdafx.cpp
+  AStarAlgorithm.cpp
+  BresenhamLine.cpp
+  JPS.cpp
+JPS.cpp(56): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+JPS.cpp(85): warning C4244: '인수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+JPS.cpp(285): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+JPS.cpp(300): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  JumpPointSearch.cpp
+JumpPointSearch.cpp(60): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(160): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(162): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(170): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(172): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(180): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(182): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(190): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(192): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(205): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(207): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(220): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(222): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(235): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(237): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(249): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(251): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(262): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(277): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+JumpPointSearch.cpp(292): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+JumpPointSearch.cpp(332): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(334): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(335): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(352): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(354): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(355): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(371): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(373): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(374): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(390): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(392): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(393): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(410): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(412): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(413): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(438): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(440): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(441): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(466): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(468): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(469): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(494): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(496): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(497): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+JumpPointSearch.cpp(533): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+JumpPointSearch.cpp(619): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
   코드를 생성하고 있습니다.
-  4 of 405 functions ( 1.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    3 functions had inline decision re-evaluated but remain unchanged
+d:\workspace\jumppointsearch\astaralgorithm\jumppointsearch.cpp(327): warning C4715: 'CJumpPointSearch::Jump': 모든 제어 경로에서 값을 반환하지는 않습니다.
+  407 of 409 functions (99.5%) were compiled, the rest were copied from previous compilation.
+    8 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
-  AStarAlgorithm.vcxproj -> D:\Workspace\Github\JumpPointSearch\JumpPointSearch\x64\Release\JumpPointSearch.exe
-  AStarAlgorithm.vcxproj -> D:\Workspace\Github\JumpPointSearch\JumpPointSearch\x64\Release\JumpPointSearch.pdb (Full PDB)
+  AStarAlgorithm.vcxproj -> D:\Workspace\JumpPointSearch\x64\Release\JumpPointSearch.exe
+  AStarAlgorithm.vcxproj -> D:\Workspace\JumpPointSearch\x64\Release\JumpPointSearch.pdb (Full PDB)

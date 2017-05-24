@@ -39,6 +39,9 @@
     <ClInclude Include="JumpPointSearch.h">
       <Filter>JumpPointSearch</Filter>
     </ClInclude>
+    <ClInclude Include="BresenhamLine.h">
+      <Filter>JumpPointSearch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -51,6 +54,9 @@
       <Filter>JumpPointSearch</Filter>
     </ClCompile>
     <ClCompile Include="JumpPointSearch.cpp">
+      <Filter>JumpPointSearch</Filter>
+    </ClCompile>
+    <ClCompile Include="BresenhamLine.cpp">
       <Filter>JumpPointSearch</Filter>
     </ClCompile>
   </ItemGroup>
